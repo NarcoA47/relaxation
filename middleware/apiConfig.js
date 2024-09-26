@@ -39,7 +39,7 @@ export async function signInUser(username, password) {
 // Function to sign up a user
 export async function signUpUser(username, email, password) {
   try {
-    const response = await axios.post(`${API_BASE_URL}auth/users/`, {
+    const response = await axios.post(`${API_BASE_URL}users/`, {
       username,
       email,
       password

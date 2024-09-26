@@ -1,121 +1,149 @@
+import { customColors } from '@/constants/Colors';
+import { useNavigation } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, Button, TextInput, Card, useTheme } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import { signUpUser } from '../middleware/apiConfig';
 
-function SignupScreen() {
-  const navigation = useNavigation();
-  
+export default function SignUpScreen() {
+    const navigation = useNavigation();
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [secureTextEntry, setSecureTextEntry] = useState(true);
+    const [error, setError] = useState('');
+    const [isError, setIsError] = useState(false);
+    const { colors } = useTheme();
 
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+    const handleSignUp = async () => {
+        setError('');
+        setIsError(false);
 
-  const handleSignUp = async () => {
-    setLoading(true);
-    try {
-      
-      const response = await signUpUser(firstname, lastname, email, password);
-      Alert.alert('Success', 'Sign up successful');
-      navigation.navigate('(tabs)'); 
-    } catch (error) {
-      Alert.alert('Error', 'Sign up failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+        try {
+            const response = await signUpUser({ username, email, password });
+            if (response && response.success) {
+                
+                setError('Sign-up failed. Please try again.');
+                setIsError(true);
+            } else {
+              navigation.navigate('(tabs)');
+            }
+        } catch (error) {
+            setError('Sign-up failed. Please try again.');
+            setIsError(true);
+        }
+    };
 
-  return (
-    <View style={styles.container}>
-      <View>
-        <View>
-          <Text style={styles.textHeaderInput}>Firstname</Text>
-          <TextInput
-            placeholder='Joe'
-            value={firstname}
-            onChangeText={setFirstname}
-            style={styles.textInput}
-          />
+    const toggleSecureTextEntry = () => {
+        setSecureTextEntry(!secureTextEntry);
+    };
+
+    return (
+        <View style={styles.container}>
+            <Icon name="account-plus" size={100} color={customColors.accent} style={styles.icon} />
+
+            <Card style={styles.card}>
+                <Card.Content>
+                    <Text style={styles.title}>Create a New Account</Text>
+                    <TextInput
+                        label="Username"
+                        value={username}
+                        onChangeText={setUsername}
+                        mode="outlined"
+                        theme={{
+                            colors: { primary: customColors.primary, error: customColors.error },
+                            fonts: { regular: { fontFamily: 'GeistSans', fontWeight: '400' } },
+                        }}
+                        error={isError}
+                    />
+                    <TextInput
+                        label="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        mode="outlined"
+                        theme={{
+                            colors: { primary: customColors.primary, error: customColors.error },
+                            fonts: { regular: { fontFamily: 'GeistSans', fontWeight: '400' } },
+                        }}
+                        error={isError}
+                    />
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            label="Password"
+                            value={password}
+                            onChangeText={setPassword}
+                            mode="outlined"
+                            secureTextEntry={secureTextEntry}
+                            theme={{
+                                colors: { primary: customColors.primary, error: customColors.error },
+                                fonts: { regular: { fontFamily: 'GeistSans', fontWeight: '400' } },
+                            }}
+                            error={isError}
+                        />
+                        <TouchableOpacity onPress={toggleSecureTextEntry} style={styles.eyeIcon}>
+                            <Icon name={secureTextEntry ? "eye-outline" : "eye-off-outline"} size={24} color={customColors.accent} />
+                        </TouchableOpacity>
+                    </View>
+                    {isError && <Text style={styles.errorText}>{error}</Text>}
+                </Card.Content>
+            </Card>
+            <Button
+                mode="contained"
+                onPress={handleSignUp}
+                theme={{
+                    colors: { primary: customColors.primary, text: customColors.text },
+                    fonts: { regular: { fontFamily: 'GeistSans', fontWeight: '800' } },
+                }}
+            >
+                Sign Up
+            </Button>
+            <TouchableOpacity onPress={() => navigation.navigate('signin')} style={styles.signInLink}>
+                <Text style={styles.signInText}>Already have an account? Sign In</Text>
+            </TouchableOpacity>
         </View>
-        <View style={styles.headerInput}>
-          <Text style={styles.textHeaderInput}>Lastname</Text>
-          <TextInput
-            placeholder='Doe'
-            value={lastname}
-            onChangeText={setLastname}
-            style={styles.textInput}
-          />
-        </View>
-        <View style={styles.headerInput}>
-          <Text style={styles.textHeaderInput}>Email</Text>
-          <TextInput
-            placeholder='username@gmail.com'
-            value={email}
-            onChangeText={setEmail}
-            style={styles.textInput}
-          />
-        </View>
-        <View style={styles.headerInput}>
-          <Text style={styles.textHeaderInput}>Password</Text>
-          <TextInput
-            placeholder='Your Password'
-            value={password}
-            onChangeText={setPassword}
-            style={styles.textInput}
-            secureTextEntry
-          />
-        </View>
-      </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSignUp}
-        disabled={loading} // Disable button while loading
-      >
-        <Text style={styles.buttonText}>{loading ? 'Signing Up...' : 'Sign Up'}</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    );
 }
 
-export default SignupScreen;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  textHeaderInput: {
-    marginLeft: 15,
-    fontSize: 14,
-  },
-  headerInput: {
-    marginTop: 15,
-  },
-  textInput: {
-    width: 380,
-    height: 35,
-    borderColor: '#0000007C',
-    borderWidth: 1,
-    marginLeft: 15,
-    padding: 5,
-    borderRadius: 2,
-  },
-  button: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#047900',
-    width: 375,
-    height: 50,
-    borderRadius: 5,
-    padding: 15,
-    marginTop: 25,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 18,
-  },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        padding: 20,
+        backgroundColor: '#f7f7f7',
+    },
+    icon: {
+        alignSelf: 'center',
+        marginBottom: 20,
+    },
+    card: {
+        marginBottom: 20,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    passwordContainer: {
+        position: 'relative',
+    },
+    eyeIcon: {
+        position: 'absolute',
+        right: 10,
+        top: 15,
+    },
+    errorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginTop: 10,
+    },
+    signInLink: {
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    signInText: {
+        fontWeight: 'bold',
+    },
 });

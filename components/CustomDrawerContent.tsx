@@ -18,6 +18,7 @@ export default function CustomDrawerContent({ navigation }) {
             Alert.alert('Logout Failed', 'Unable to logout. Please try again.');
         }
     };
+    
 
     return (
         <DrawerContentScrollView style={styles.container}>

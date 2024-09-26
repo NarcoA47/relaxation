@@ -25,10 +25,11 @@ export const Colors = {
 export const customColors = {
   primary: '#007910FF',
   accent: '#007910FF',
-  background: '#f5f5f5',
+  background: '#FFFFFFFF',
   surface: '#ffffff',
   error: '#B30000FF',
   text: '#000000',
+  textWhite: '#ffffff',
   placeholder: '#9e9e9e',
 };
 // export Size
